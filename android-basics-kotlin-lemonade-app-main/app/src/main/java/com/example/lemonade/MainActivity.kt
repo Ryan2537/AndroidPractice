@@ -20,6 +20,9 @@ import android.os.Bundle
 import android.widget.ImageView
 import android.widget.TextView
 import com.google.android.material.snackbar.Snackbar
+import android.util.Log
+
+private const val TAG = "MainActivity"
 
 class MainActivity : AppCompatActivity() {
 
@@ -67,6 +70,7 @@ class MainActivity : AppCompatActivity() {
         setViewElements()
         lemonImage!!.setOnClickListener {
             // TODO: call the method that handles the state when the image is clicked
+            clickLemonImage()
         }
         lemonImage!!.setOnLongClickListener {
             // TODO: replace 'false' with a call to the function that shows the squeeze count
@@ -91,26 +95,41 @@ class MainActivity : AppCompatActivity() {
      * This method determines the state and proceeds with the correct action.
      */
     private fun clickLemonImage() {
-        // TODO: use a conditional statement like 'if' or 'when' to track the lemonadeState
+        // use a conditional statement like 'if' or 'when' to track the lemonadeState
         //  when the image is clicked we may need to change state to the next step in the
         //  lemonade making progression (or at least make some changes to the current state in the
         //  case of squeezing the lemon). That should be done in this conditional statement
-
-        // TODO: When the image is clicked in the SELECT state, the state should become SQUEEZE
-        //  - The lemonSize variable needs to be set using the 'pick()' method in the LemonTree class
-        //  - The squeezeCount should be 0 since we haven't squeezed any lemons just yet.
-
-        // TODO: When the image is clicked in the SQUEEZE state the squeezeCount needs to be
-        //  INCREASED by 1 and lemonSize needs to be DECREASED by 1.
-        //  - If the lemonSize has reached 0, it has been juiced and the state should become DRINK
-        //  - Additionally, lemonSize is no longer relevant and should be set to -1
-
-        // TODO: When the image is clicked in the DRINK state the state should become RESTART
-
-        // TODO: When the image is clicked in the RESTART state the state should become SELECT
-
-        // TODO: lastly, before the function terminates we need to set the view elements so that the
+        when (lemonadeState) {
+            // When the image is clicked in the SELECT state, the state should become SQUEEZE
+            //  - The lemonSize variable needs to be set using the 'pick()' method in the LemonTree class
+            //  - The squeezeCount should be 0 since we haven't squeezed any lemons just yet.
+            SELECT -> {
+                lemonadeState = SQUEEZE
+                lemonSize = lemonTree.pick()
+                squeezeCount = 0
+            }
+            // When the image is clicked in the SQUEEZE state the squeezeCount needs to be
+            //  INCREASED by 1 and lemonSize needs to be DECREASED by 1.
+            //  - If the lemonSize has reached 0, it has been juiced and the state should become DRINK
+            //  - Additionally, lemonSize is no longer relevant and should be set to -1
+            SQUEEZE -> {
+                squeezeCount++
+                lemonSize--
+                if (lemonSize == 0) {
+                    lemonadeState = DRINK
+                    lemonSize = -1
+                }
+            }
+            // When the image is clicked in the DRINK state the state should become RESTART
+            DRINK -> { lemonadeState = RESTART }
+            // When the image is clicked in the RESTART state the state should become SELECT
+            RESTART -> { lemonadeState = SELECT }
+            // fail state
+            else -> { lemonadeState = SELECT; Log.w(TAG, "Unexpected state in lemonadeState. revert to SELECT") }
+        }
+        // lastly, before the function terminates we need to set the view elements so that the
         //  UI can reflect the correct state
+        setViewElements()
     }
 
     /**
